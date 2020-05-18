@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+import time
 
 
 def solve_knapsack_problem_dp(data, weight_knapsack):
@@ -7,46 +7,245 @@ def solve_knapsack_problem_dp(data, weight_knapsack):
     weights_subjects = list(data["weight"])
     value = list(data["value"])
 
-    matrix = np.zeros((len(weights_subjects)+1, weight_knapsack+1))
-    for i in range(len(weights_subjects)+1):
+    matrix = np.zeros((len(weights_subjects), weight_knapsack+1))
+    time_result_one_max = []
+    for i in range(len(weights_subjects)):
+        # print(i, weight_knapsack+1 )
         for w in range(weight_knapsack+1):
             if i == 0 or w == 0:
                 matrix[i][w] = 0
-            elif w-weights_subjects[i-1] >= 0:
-                matrix[i][w] = max(value[i-1] + matrix[i-1][w-weights_subjects[i-1]], matrix[i-1][w])
+            elif w-weights_subjects[i] >= 0:
+                bt1 = time.perf_counter()
+                # print(w)
+                matrix[i][w] = max(value[i] + matrix[i-1][w-weights_subjects[i]], matrix[i-1][w])
+                time_result_one_max.append(time.perf_counter() - bt1)
+
             else:
                 matrix[i][w] = matrix[i-1][w]
-    for i in matrix:
-        print(i)
+    print("time_result_one_max", sum(time_result_one_max)/len(time_result_one_max), len(time_result_one_max))
 
-    return matrix[-1][-1]
-
-
-def solve_knapsack_problem_dp_evolved(data, weight_knapsack):
-    data = data.sort_values(by=["weight"])
-    # todo: need make tree for fast calculating needed cells from dp table
+    ans = matrix[-1][-1]
+    del matrix
+    return ans, "Simple DP"
 
 
-def read_data_from_file(filename):
-    with open(filename, "r") as f:
-        data = f.readlines()
-    weight_knapsack = int(data[0].split(" ")[1])
-    weight_items = list()
-    value_items = list()
-    for id, line in enumerate(data):
-        if id>0:
-            weight_items.append(int(data[id].split(" ")[1]))
-            value_items.append(int(data[id].split(" ")[0]))
+def solve_knapsack_problem_dp_with_reds(data, weight_knapsack):
+    data = data.sort_values(by=["weight"], ascending=False)  # todo: now quick sort, change to another sort ???
 
-    data = pd.DataFrame()
-    data["weight"] = weight_items
-    data["value"] = value_items
+    weights_subjects = list(data["weight"])
+    weights_subjects.insert(0, weights_subjects[-1])
+    weights_subjects.pop(-1)
 
-    return weight_knapsack, data
+    values_subjects = list(data["value"])
+    values_subjects.insert(0, values_subjects[-1])
+    values_subjects.pop(-1)
+
+    matrix = np.zeros((len(weights_subjects), weight_knapsack + 1))
+
+    # construct left bound
+    list_calc = list()
+
+    list_calc.append([len(weights_subjects) - 1, weight_knapsack])
+    queue_calc_weights = np.zeros(len(weights_subjects))
+    queue_calc_weights[-1] = weight_knapsack
 
 
-if __name__ == "__main__":
-    filename = 'data/low-dimensional/f3_l-d_kp_4_20'
-    weight_knapsack, data = read_data_from_file(filename)
-    print(solve_knapsack_problem_dp(data, weight_knapsack))
+    while len(list_calc) != 0:  # O(n)
+        current_node = list_calc.pop()
 
+        if current_node[0] != 0 and current_node[1] != 0:
+            if current_node[1] - weights_subjects[current_node[0]] > 0:
+                list_calc.append([current_node[0] - 1, current_node[1] - weights_subjects[current_node[0]]])
+                queue_calc_weights[current_node[0] - 1] = current_node[1] - weights_subjects[current_node[0]]
+            else:
+                list_calc.append([current_node[0] - 1, current_node[1]])
+                queue_calc_weights[current_node[0] - 1] = current_node[1]
+
+        else:
+            break
+
+    queue_calc_weights = queue_calc_weights.astype(int)
+    for i in range(len(weights_subjects)):
+        for w in range(queue_calc_weights[i], weight_knapsack+1):
+            if i == 0 or w == 0:
+                matrix[i][w] = 0
+            elif w-weights_subjects[i] >= 0:
+                matrix[i][w] = max(values_subjects[i] + matrix[i-1][w-weights_subjects[i]], matrix[i-1][w])
+            else:
+                matrix[i][w] = matrix[i-1][w]
+    ans = matrix[-1][-1]
+    del matrix
+    return ans, "Sorted + Red DP"
+
+
+def solve_knapsack_problem_dp_with_memory(data, weight_knapsack):
+
+    data = data.sort_values(by=["weight"], ascending=False)  # todo: now quick sort, change to another sort ???
+
+    weights_subjects = list(data["weight"])
+    weights_subjects.insert(0, weights_subjects[-1])
+    weights_subjects.pop(-1)
+
+    values_subjects = list(data["value"])
+    values_subjects.insert(0, values_subjects[-1])
+    values_subjects.pop(-1)
+
+    matrix = np.zeros((len(weights_subjects), weight_knapsack+1))
+
+
+    list_calc = list()
+
+    list_calc.append([len(weights_subjects) - 1, weight_knapsack])
+    queue_calc_weights = np.zeros(len(weights_subjects))
+    queue_calc_weights[-1] = weight_knapsack
+
+
+    while len(list_calc) != 0:  # O(n)
+        current_node = list_calc.pop()
+
+        if current_node[0] != 0 and current_node[1] != 0:
+            if current_node[1] - weights_subjects[current_node[0]] > 0:
+                list_calc.append([current_node[0] - 1, current_node[1] - weights_subjects[current_node[0]]])
+                queue_calc_weights[current_node[0]-1] = current_node[1] - weights_subjects[current_node[0]]
+            else:
+                list_calc.append([current_node[0] - 1, current_node[1]])
+                queue_calc_weights[current_node[0]-1] = current_node[1]
+
+        else:
+            break
+
+    queue_calc_weights = queue_calc_weights.astype(int)
+    # minimum = min(queue_calc_weights)
+    # queue_calc_weights = [minimum for i in queue_calc_weights if i==0]
+
+
+    time_result_max = []
+    time_result_green = []
+    time_result_one_max = []
+    last_row = []
+
+
+    last_row.append(weights_subjects[1])
+    matrix[1][weights_subjects[1]:] = values_subjects[1]
+    for i in range(2, len(weights_subjects)):
+        current_row = last_row.copy()
+
+        current_row.append(weights_subjects[i])
+        for weight in last_row:
+            current_row.append(weight+weights_subjects[i]) # last_row[weight]+values_subjects[i]
+
+        bt = time.perf_counter()  # TODO: NEED TO INSERT MATRIX
+        current_row = np.array(current_row)
+        current_row = sorted(list(set(current_row[np.logical_and(current_row >= queue_calc_weights[i-1], current_row<=weight_knapsack)]))) # current_row>= queue_calc_weights[i]
+        # print(i, len(set(current_row)))
+        time_result_green.append(time.perf_counter()-bt)
+        for green_nodes in current_row:
+            # print(green_nodes)
+            bt1 = time.perf_counter()
+            matrix[i][green_nodes:] = max(values_subjects[i] + matrix[i - 1][green_nodes - weights_subjects[i]], matrix[i - 1][green_nodes])
+            time_result_one_max.append(time.perf_counter()-bt1)
+
+        time_result_max.append(time.perf_counter()-bt)
+
+        last_row = list(current_row).copy()
+
+    print("time_result_max!", sum(time_result_max))
+    print("time_result_green!", sum(time_result_green))
+    print("time_result_one_max", sum(time_result_one_max)/len(time_result_one_max), len(time_result_one_max))
+
+    return matrix[-1][-1], "Memory DP"
+
+
+
+# def solve_knapsack_problem_dp_with_memory(data, weight_knapsack):
+#
+#     data = data.sort_values(by=["weight"], ascending=False)  # todo: now quick sort, change to another sort ???
+#
+#     weights_subjects = list(data["weight"])
+#     weights_subjects.insert(0, weights_subjects[-1])
+#     weights_subjects.pop(-1)
+#
+#     values_subjects = list(data["value"])
+#     values_subjects.insert(0, values_subjects[-1])
+#     values_subjects.pop(-1)
+#
+#     matrix = np.zeros((len(weights_subjects), weight_knapsack+1))
+#
+#     last_row = dict()
+#     current_row = dict()
+#
+#     matrix[1][weights_subjects[1]:] = values_subjects[1]
+#     last_row[weights_subjects[1]] = values_subjects[1]
+#
+#     for i in range(2, len(weights_subjects)):
+#         ids_founded = []
+#         current_row = last_row.copy()
+#
+#         current_row[weights_subjects[i]] = values_subjects[i] # TODO: solve assumption that all weights are unique
+#         # matrix[i][weights_subjects[i]] = values_subjects[i]
+#         ids_founded.append(weights_subjects[i])
+#         for weight in last_row:
+#             if weight+weights_subjects[i] <= weight_knapsack:
+#                 # if weight+weights_subjects[i] in last_row:
+#                     if last_row[weight]+values_subjects[i] > matrix[i-1][weight+weights_subjects[i]]:
+#                         current_row[weight+weights_subjects[i]] = last_row[weight]+values_subjects[i]
+#                         # matrix[i][weight+weights_subjects[i]] = current_row[weight+weights_subjects[i]]
+#                         ids_founded.append(weight+weights_subjects[i])
+#
+#                 # else:
+#                 #     current_row[weight + weights_subjects[i]] = last_row[weight] + values_subjects[i]
+#                     # matrix[i][weight + weights_subjects[i]] = current_row[weight + weights_subjects[i]]
+#                     # ids_founded.append(weight + weights_subjects[i])
+#
+#         ids_founded = sorted(ids_founded)
+#         for ids in range(1, len(ids_founded)):
+#             matrix[i][ids_founded[ids-1]:ids_founded[ids]] = current_row[ids_founded[ids-1]]
+#         matrix[i][ids_founded[ids]:] = current_row[ids_founded[ids]]
+#         last_row = current_row.copy()
+#
+#     # print(current_row)
+#     return matrix[-1][-1], "Memory DP"
+#     # ans = matrix[-1][-1]
+#     # del matrix
+#     # return ans, "Simple DP"
+
+
+# def solve_knapsack_problem_dp_with_memory(data, weight_knapsack):
+#
+#     data = data.sort_values(by=["weight"], ascending=False)  # todo: now quick sort, change to another sort ???
+#
+#     weights_subjects = list(data["weight"])
+#     weights_subjects.insert(0, weights_subjects[-1])
+#     weights_subjects.pop(-1)
+#
+#     values_subjects = list(data["value"])
+#     values_subjects.insert(0, values_subjects[-1])
+#     values_subjects.pop(-1)
+#
+#     matrix = np.zeros((len(weights_subjects), weight_knapsack+1))
+#
+#     last_row = dict()
+#     current_row = dict()
+#
+#     for i in range(1, len(weights_subjects)):
+#         current_row = last_row.copy()
+#
+#         current_row[weights_subjects[i]] = values_subjects[i] # TODO: solve assumption that all weights are unique
+#
+#         for weight in last_row:
+#             if weight+weights_subjects[i] <= weight_knapsack:
+#                 if weight+weights_subjects[i] in last_row:
+#                     if last_row[weight]+values_subjects[i] > last_row[weight+weights_subjects[i]]:
+#                         current_row[weight+weights_subjects[i]] = last_row[weight]+values_subjects[i]
+#                         # matrix[i][weight+weights_subjects[i]] = current_row[weight+weights_subjects[i]]
+#                 else:
+#                     current_row[weight + weights_subjects[i]] = last_row[weight] + values_subjects[i]
+#                     # matrix[i][weight + weights_subjects[i]] = current_row[weight + weights_subjects[i]]
+#
+#         last_row = current_row.copy()
+#
+#     # print(current_row)
+#     return current_row[weight_knapsack], "Memory DP"
+#     # ans = matrix[-1][-1]
+#     # del matrix
+#     # return ans, "Simple DP"
