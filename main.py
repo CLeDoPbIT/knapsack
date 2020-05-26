@@ -1,6 +1,8 @@
 import pandas as pd
 import time
 from dynamic_programming import solve_knapsack_problem_dp, solve_knapsack_problem_dp_with_reds, solve_knapsack_problem_dp_with_memory
+from greedy import greedy
+from branch_and_bounds import simple_bnb, sorted_simple_bnb
 import os
 from IPython.display import display
 
@@ -14,6 +16,10 @@ def read_data_from_file(filename):
         if id>0:
             weight_items.append(int(data[id].split(" ")[1]))
             value_items.append(int(data[id].split(" ")[0]))
+    if value_items[-1] == 0 or weight_items[-1] == 0:
+        value_items.pop()
+        weight_items.pop()
+
     data = pd.DataFrame()
     data["weight"] = [0] + weight_items
     data["value"] = [0] + value_items
@@ -31,12 +37,18 @@ def solve_task(function, data, weight_knapsack, task_name):
 
 def run_all_low(methods):
     # path = "data/low-dimensional/"
-    path = "data/large_scale"
     # filenames = os.listdir(path)
-    filenames = ["knapPI_1_100_1000_1", "knapPI_2_100_1000_1", "knapPI_3_100_1000_1",
-                 "knapPI_1_200_1000_1", "knapPI_2_200_1000_1", "knapPI_3_200_1000_1",
-                 "knapPI_1_500_1000_1", "knapPI_2_500_1000_1", "knapPI_3_500_1000_1",
-                 "knapPI_1_1000_1000_1", "knapPI_2_1000_1000_1", "knapPI_3_1000_1000_1",]
+
+    path = "data/large_scale"
+    # filenames = ["knapPI_1_100_1000_1", "knapPI_2_100_1000_1", "knapPI_3_100_1000_1"]
+
+    # filenames = ["knapPI_1_100_1000_1", "knapPI_2_100_1000_1", "knapPI_3_100_1000_1",
+    #              "knapPI_1_200_1000_1", "knapPI_2_200_1000_1", "knapPI_3_200_1000_1",
+    #              "knapPI_1_500_1000_1", "knapPI_2_500_1000_1", "knapPI_3_500_1000_1",
+    #              "knapPI_1_1000_1000_1", "knapPI_2_1000_1000_1", "knapPI_3_1000_1000_1"]  #
+    filenames = ["knapPI_1_500_1000_1", "knapPI_2_500_1000_1", "knapPI_3_500_1000_1",
+                 ]  #"knapPI_1_1000_1000_1", "knapPI_2_1000_1000_1", "knapPI_3_1000_1000_1"
+
     result = {"Data":[], "Method":[], "Time":[],  "Value":[]}
     for file in filenames:
         weight_knapsack, data = read_data_from_file(os.path.join(path, file))
@@ -52,7 +64,7 @@ def run_all_low(methods):
 
 def run_one(methods):
     path = "data/low-dimensional/"
-    file = 'f8_l-d_kp_23_10000'
+    file = 'f7_l-d_kp_7_50'
 
     # path = "data/large_scale"
     # file = 'knapPI_1_2000_1000_1'
@@ -71,6 +83,6 @@ def run_one(methods):
 
 
 if __name__ == "__main__":
-    methods = [solve_knapsack_problem_dp_with_memory, solve_knapsack_problem_dp_with_reds, solve_knapsack_problem_dp]
+    methods = [sorted_simple_bnb,  greedy, solve_knapsack_problem_dp_with_memory, solve_knapsack_problem_dp_with_reds, solve_knapsack_problem_dp] # simple_bnb
     # run_one(methods)
     run_all_low(methods)
