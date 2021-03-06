@@ -15,10 +15,12 @@ def greedy(data, weight_knapsack):
 
     cur_weight = 0
     result_value = 0
+    counter_cells = 0
     for v, _ in enumerate(value):
         if cur_weight + weights_subjects[value[v][0]] <= weight_knapsack:
+            counter_cells += 1
             cur_weight += weights_subjects[value[v][0]]
             result_value += values_subjects[value[v][0]]
         else:
             continue
-    return result_value, "Greedy"
+    return result_value, "Greedy", counter_cells

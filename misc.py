@@ -6,25 +6,25 @@ import itertools
 import random
 
 
-def solve_knapsack_problem_dp(data, weight_knapsack):
-
-    weights_subjects = list(data["weight"])
-    value = list(data["value"])
-
-    matrix = np.zeros((len(weights_subjects)+1, weight_knapsack+1))
-    for i in range(len(weights_subjects)+1):
-        for w in range(weight_knapsack+1):
-            if i == 0 or w == 0:
-                matrix[i][w] = 0
-            elif w-weights_subjects[i-1] >= 0:
-                matrix[i][w] = max(value[i-1] + matrix[i-1][w-weights_subjects[i-1]], matrix[i-1][w])
-            else:
-                matrix[i][w] = matrix[i-1][w]
-    # for i in matrix:
-    #     print(i)
-    ans = matrix[-1][-1]
-    del matrix
-    return ans
+# def solve_knapsack_problem_dp(data, weight_knapsack):
+#
+#     weights_subjects = list(data["weight"])
+#     value = list(data["value"])
+#
+#     matrix = np.zeros((len(weights_subjects)+1, weight_knapsack+1))
+#     for i in range(len(weights_subjects)+1):
+#         for w in range(weight_knapsack+1):
+#             if i == 0 or w == 0:
+#                 matrix[i][w] = 0
+#             elif w-weights_subjects[i-1] >= 0:
+#                 matrix[i][w] = max(value[i-1] + matrix[i-1][w-weights_subjects[i-1]], matrix[i-1][w])
+#             else:
+#                 matrix[i][w] = matrix[i-1][w]
+#     # for i in matrix:
+#     #     print(i)
+#     ans = matrix[-1][-1]
+#     del matrix
+#     return ans
 
 
 # def solve_knapsack_problem_dp_our():
@@ -298,24 +298,24 @@ def solve_knapsack_problem_dp_evolved_2_sorted(data, weight_knapsack):
 
 
 
-def read_data_from_file(filename):
-    with open(filename, "r") as f:
-        data = f.readlines()
-    weight_knapsack = int(data[0].split(" ")[1])
-    weight_items = list()
-    value_items = list()
-    for id, line in enumerate(data):
-        if id>0:
-            weight_items.append(int(data[id].split(" ")[1]))
-            value_items.append(int(data[id].split(" ")[0]))
-    weight_items.pop()
-    value_items.pop()
-    data = pd.DataFrame()
-    data["weight"] = weight_items
-    data["value"] = value_items
-
-    return weight_knapsack, data
-
+# def read_data_from_file(filename):
+#     with open(filename, "r") as f:
+#         data = f.readlines()
+#     weight_knapsack = int(data[0].split(" ")[1])
+#     weight_items = list()
+#     value_items = list()
+#     for id, line in enumerate(data):
+#         if id>0:
+#             weight_items.append(int(data[id].split(" ")[1]))
+#             value_items.append(int(data[id].split(" ")[0]))
+#     weight_items.pop()
+#     value_items.pop()
+#     data = pd.DataFrame()
+#     data["weight"] = weight_items
+#     data["value"] = value_items
+#
+#     return weight_knapsack, data
+#
 
 class Greedy:
 
