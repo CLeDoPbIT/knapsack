@@ -80,11 +80,11 @@ def run_all_low(methods):
 
 
 def run_one(methods):
-    path = "data/low-dimensional/"
-    file = 'f4_l-d_kp_4_11'
+    # path = "data/low-dimensional/"
+    # file = 'f4_l-d_kp_4_11'
 
-    # path = "data/large_scale"
-    # file = 'knapPI_1_2000_1000_1'
+    path = "data/large_scale"
+    file = 'knapPI_1_1000_1000_1'
 
     result = {"Data":[], "Method":[], "Time":[],  "Value":[], "Operations":[]}
 
@@ -175,7 +175,7 @@ def run_random_tasks(methods):
 
 if __name__ == "__main__":
     # methods = [backtracking, backtracking_red, backtracking_bnb, greedy, solve_knapsack_problem_dp_with_reds, solve_knapsack_problem_dp] # solve_knapsack_problem_dp_with_memory_fast  sorted_simple_bnb simple_bnb, bnb_guys
-    methods = [simple_bnb, backtracking_bnb]
+    methods = [ backtracking ] # solve_knapsack_problem_dp, solve_knapsack_problem_dp_with_reds,
     run_one(methods)
     # run_all_low(methods)
     # run_random_tasks(methods)

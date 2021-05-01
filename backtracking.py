@@ -17,7 +17,9 @@ def backtracking(data, weight_knapsack):
         while i_cw < len(current_weights):
             if current_weights[i_cw] + weights_subjects[i] <= weight_knapsack:
                 counter_cells += 1
-                if current_weights[i_cw]+weights_subjects[i] in tmp_result:
+                # if current_weights[i_cw] + weights_subjects[i] == 20:
+                #     print(i)
+                if current_weights[i_cw] + weights_subjects[i] in tmp_result:
                     result[current_weights[i_cw] + weights_subjects[i]] = max(tmp_result[current_weights[i_cw] + weights_subjects[i]], tmp_result[current_weights[i_cw]] + values_subjects[i])
                     if result[current_weights[i_cw] + weights_subjects[i]] <= result[current_weights[i_cw]] + values_subjects[i]:
                         items[current_weights[i_cw] + weights_subjects[i]] = items[current_weights[i_cw]] + [i]

@@ -10,9 +10,9 @@ def solve_knapsack_problem_dp(data, weight_knapsack):
     matrix = np.zeros((len(weights_subjects), weight_knapsack+1))
     time_result_one_max = []
     counter_cells = 0
-    for i in range(len(weights_subjects)):
+    for i in range(1, len(weights_subjects)):
         # print(i, weight_knapsack+1 )
-        for w in range(weight_knapsack+1):
+        for w in range(1, weight_knapsack+1):
             counter_cells += 1
             if i == 0 or w == 0:
                 matrix[i][w] = 0
@@ -70,7 +70,7 @@ def solve_knapsack_problem_dp_with_reds(data, weight_knapsack):
     counter_cells = 0
     time_result_one_max = []
 
-    for i in range(len(weights_subjects)):
+    for i in range(1, len(weights_subjects)):
         for w in range(queue_calc_weights[i], weight_knapsack+1):
             counter_cells += 1
             if i == 0 or w == 0:
